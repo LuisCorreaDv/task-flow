@@ -60,7 +60,6 @@ function LogIn() {
           </form>
         </section>
       </main>
-      {/* Page Footer */}
     </>
   );
 }
