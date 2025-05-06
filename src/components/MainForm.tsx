@@ -11,15 +11,14 @@ function MainForm() {
       initialValues={{ email: "", password: "" }}
       //Schema for form validation
       validationSchema={loginSchema}
-      onSubmit={(values) => {
+      onSubmit={(values, { resetForm }) => {
         console.log("Form submitted:", values);
-        values.email = "";
-        values.password = "";
+        resetForm(); // Reset the form after submission
       }}
     >
       {({ errors, touched }) => (
         // Form component to handle form submission
-        <Form className="max-w-md mx-auto">
+        <Form className="max-w-md mx-auto" id="login-form">
           <div className="relative z-0 w-full mb-5 group">
             {/* Field component for Formkit usage */}
             <Field
