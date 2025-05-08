@@ -2,8 +2,25 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { loginSchema } from "@/utils/validations";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { loginUser } from "@/redux/features/authSlice";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 function MainForm() {
+
+  // Custom hooks to access Redux store and dispatch actions
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { token, loading, error} = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    // Redirect to tasks route if token is present
+    if (token) {
+      router.push("/tasks");
+    }
+  }, [token, router]);
+
   return (
     // Formik component to handle form state and validation
     // Formik takes initial values, validation schema, and onSubmit function as props
@@ -11,9 +28,9 @@ function MainForm() {
       initialValues={{ email: "", password: "" }}
       //Schema for form validation
       validationSchema={loginSchema}
-      onSubmit={(values, { resetForm }) => {
-        console.log("Form submitted:", values);
-        resetForm(); // Reset the form after submission
+      onSubmit={(values) => {
+        // Dispatch login action with form values
+        dispatch(loginUser(values));
       }}
     >
       {({ errors, touched }) => (
@@ -68,12 +85,13 @@ function MainForm() {
               className="text-red-500 text-xs mt-1"
             />
           </div>
-
+          {error && <div className="text-sm text-red-500">{error}</div>}
           <button
             type="submit"
             className="text-white bg-sky-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            disabled={loading}
           >
-            Submit
+            {loading ? 'Checking credentials...' : 'Login'}
           </button>
         </Form>
       )}
