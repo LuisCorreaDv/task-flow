@@ -27,8 +27,14 @@ const columnSlice = createSlice({
       };
       state.columns.push(newColumn);
     },
+    updateColumn: (state, action: PayloadAction<{id: Id, title: string}>) => {
+        const column = state.columns.find((column) => column.id === action.payload.id)
+        if(column) {
+            column.title = action.payload.title
+        }
+    } 
   },
 });
 
-export const { addColumn, reorderColumns } = columnSlice.actions;
+export const { addColumn, reorderColumns, updateColumn } = columnSlice.actions;
 export default columnSlice.reducer;

@@ -5,11 +5,12 @@ import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
 import TaskCard from "./TaskCard";
+import { useAppDispatch } from "@/redux/hooks";
+import { updateColumn } from "@/redux/features/columnSlice";
 
 interface ColumnContainerProps {
   column: Column;
-  deleteColumn: (id: Id) => void;
-  updateColumn: (id: Id, title: string) => void;
+  updateColumn: (id: Id, title: string) => void
 
   createTask: (columnId: Id) => void;
   tasks: Task[];
@@ -20,13 +21,13 @@ interface ColumnContainerProps {
 function ColumnContainer(props: ColumnContainerProps) {
   const {
     column,
-    deleteColumn,
-    updateColumn,
     createTask,
     tasks,
     deleteTask,
     updateTask,
   } = props;
+
+  const dispatch = useAppDispatch();
 
   const [editMode, setEditMode] = useState(false);
 
@@ -83,7 +84,7 @@ function ColumnContainer(props: ColumnContainerProps) {
           <input
             className="bg-[#f1f2f4] w-[80%] border-none rounded-md py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] hover:shadow-[inset_0_1px_4px_rgba(0,0,0,0.3)] transition-shadow duration-200"
             value={column.title}
-            onChange={(e) => updateColumn(column.id, e.target.value)}
+            onChange={(e) => dispatch(updateColumn({id: column.id, title: e.target.value}))}
             autoFocus
             onBlur={() => {
               setEditMode(false);
@@ -100,7 +101,7 @@ function ColumnContainer(props: ColumnContainerProps) {
           className="cursor-pointer stroke-gray-600 hover:stroke-gray-900 transition duration-200"
           onClick={(e) => {
             e.stopPropagation();
-            deleteColumn(column.id);
+            //deleteColumn(column.id);
           }}
         >
           <DeleteIcon />

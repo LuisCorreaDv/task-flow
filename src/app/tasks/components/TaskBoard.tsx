@@ -3,7 +3,7 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/redux/store";
-import { addColumn, reorderColumns } from "@/redux/features/columnSlice";
+import { addColumn, reorderColumns, updateColumn } from "@/redux/features/columnSlice";
 import PlusIcon from "@/Icons/PlusIcon";
 import { Column, Id, Task } from "@/types/TaskTypes";
 import { useMemo, useState, useEffect } from "react";
@@ -24,6 +24,7 @@ import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 
 export default function TaskBoard() {
+
   const dispatch: AppDispatch = useDispatch();
   const columns = useSelector((state: RootState) => state.columns.columns);
 
@@ -53,32 +54,12 @@ export default function TaskBoard() {
     })
   );
 
-  // function createColumn() {
-  //   const newColumn: Column = {
-  //     id: generateId(),
-  //     title: `Column ${columns.length + 1}`,
-  //   };
-  //   setColumns([...columns, newColumn]);
-  // }
-
   const hanbleAddColumn = (title: string) => {
     dispatch(addColumn(title));
   };
 
-  function deleteColumn(id: Id) {
-    const filteredColumns = columns.filter((column) => column.id !== id);
-    //setColumns(filteredColumns);
-
-    const newTasks = tasks.filter((task) => task.columnId !== id);
-    setTasks(newTasks);
-  }
-
-  function updateColumn(id: Id, title: string) {
-    const updatedColumns = columns.map((column) => {
-      if (column.id !== id) return column;
-      return { ...column, title };
-    });
-    //setColumns(updatedColumns);
+  const handleEditColumn = (id: Id, title: string) => {
+    dispatch(updateColumn({id, title}))
   }
 
   function deleteTask(id: Id) {
@@ -191,8 +172,7 @@ export default function TaskBoard() {
                 <ColumnContainer
                   column={column}
                   key={column.id}
-                  deleteColumn={deleteColumn}
-                  updateColumn={updateColumn}
+                  updateColumn={handleEditColumn}
                   createTask={createTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
@@ -216,8 +196,7 @@ export default function TaskBoard() {
               {activeColumn && (
                 <ColumnContainer
                   column={activeColumn}
-                  deleteColumn={deleteColumn}
-                  updateColumn={updateColumn}
+                  updateColumn={handleEditColumn}
                   createTask={createTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
