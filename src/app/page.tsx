@@ -1,5 +1,6 @@
 import React from "react";
 import LoginForm from "@/components/MainForm";
+import Footer from "@/components/Footer";
 
 function LogIn() {
   return (
@@ -22,6 +23,8 @@ function LogIn() {
           <LoginForm />
         </section>
       </main>
+
+      <Footer />
     </>
   );
 }
