@@ -3,7 +3,7 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/redux/store";
-import { addColumn, reorderColumns, updateColumn } from "@/redux/features/columnSlice";
+import { addColumn, reorderColumns, updateColumn, deleteColumn } from "@/redux/features/columnSlice";
 import PlusIcon from "@/Icons/PlusIcon";
 import { Column, Id, Task } from "@/types/TaskTypes";
 import { useMemo, useState, useEffect } from "react";
@@ -60,6 +60,10 @@ export default function TaskBoard() {
 
   const handleEditColumn = (id: Id, title: string) => {
     dispatch(updateColumn({id, title}))
+  }
+
+  const handleDeleteColumn = (id: Id) => {
+    dispatch(deleteColumn({id}))
   }
 
   function deleteTask(id: Id) {
@@ -173,6 +177,7 @@ export default function TaskBoard() {
                   column={column}
                   key={column.id}
                   updateColumn={handleEditColumn}
+                  deleteColumn={handleDeleteColumn}
                   createTask={createTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
@@ -197,6 +202,7 @@ export default function TaskBoard() {
                 <ColumnContainer
                   column={activeColumn}
                   updateColumn={handleEditColumn}
+                  deleteColumn={handleDeleteColumn}
                   createTask={createTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}

@@ -32,9 +32,12 @@ const columnSlice = createSlice({
         if(column) {
             column.title = action.payload.title
         }
-    } 
+    }, 
+    deleteColumn: (state, action: PayloadAction<{id: Id}>) => {
+        state.columns = state.columns.filter((column) => column.id !== action.payload.id)
+    }
   },
 });
 
-export const { addColumn, reorderColumns, updateColumn } = columnSlice.actions;
+export const { addColumn, reorderColumns, updateColumn, deleteColumn } = columnSlice.actions;
 export default columnSlice.reducer;

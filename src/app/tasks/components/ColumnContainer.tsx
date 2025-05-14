@@ -6,11 +6,12 @@ import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
 import TaskCard from "./TaskCard";
 import { useAppDispatch } from "@/redux/hooks";
-import { updateColumn } from "@/redux/features/columnSlice";
+import { deleteColumn, updateColumn } from "@/redux/features/columnSlice";
 
 interface ColumnContainerProps {
   column: Column;
   updateColumn: (id: Id, title: string) => void
+  deleteColumn: (id: Id) => void
 
   createTask: (columnId: Id) => void;
   tasks: Task[];
@@ -101,7 +102,7 @@ function ColumnContainer(props: ColumnContainerProps) {
           className="cursor-pointer stroke-gray-600 hover:stroke-gray-900 transition duration-200"
           onClick={(e) => {
             e.stopPropagation();
-            //deleteColumn(column.id);
+            dispatch(deleteColumn({ id: column.id }))
           }}
         >
           <DeleteIcon />
