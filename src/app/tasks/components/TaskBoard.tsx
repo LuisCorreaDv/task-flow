@@ -1,5 +1,9 @@
 // app/tasks/components/TaskBoard.tsx
 "use client";
+
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/redux/store";
+import { addColumn, reorderColumns } from "@/redux/features/columnSlice";
 import PlusIcon from "@/Icons/PlusIcon";
 import { Column, Id, Task } from "@/types/TaskTypes";
 import { useMemo, useState, useEffect } from "react";
@@ -20,7 +24,10 @@ import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 
 export default function TaskBoard() {
-  const [columns, setColumns] = useState<Column[]>([]);
+  const dispatch: AppDispatch = useDispatch();
+  const columns = useSelector((state: RootState) => state.columns.columns);
+
+  // const [columns, setColumns] = useState<Column[]>([]);
   const [mounted, setMounted] = useState(false);
 
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -46,21 +53,21 @@ export default function TaskBoard() {
     })
   );
 
-  function createColumn() {
-    const newColumn: Column = {
-      id: generateId(),
-      title: `Column ${columns.length + 1}`,
-    };
-    setColumns([...columns, newColumn]);
-  }
+  // function createColumn() {
+  //   const newColumn: Column = {
+  //     id: generateId(),
+  //     title: `Column ${columns.length + 1}`,
+  //   };
+  //   setColumns([...columns, newColumn]);
+  // }
 
-  function generateId() {
-    return Math.floor(Math.random() * 10000);
-  }
+  const hanbleAddColumn = (title: string) => {
+    dispatch(addColumn(title));
+  };
 
   function deleteColumn(id: Id) {
     const filteredColumns = columns.filter((column) => column.id !== id);
-    setColumns(filteredColumns);
+    //setColumns(filteredColumns);
 
     const newTasks = tasks.filter((task) => task.columnId !== id);
     setTasks(newTasks);
@@ -71,7 +78,7 @@ export default function TaskBoard() {
       if (column.id !== id) return column;
       return { ...column, title };
     });
-    setColumns(updatedColumns);
+    //setColumns(updatedColumns);
   }
 
   function deleteTask(id: Id) {
@@ -96,23 +103,16 @@ export default function TaskBoard() {
     setActiveColumn(null);
     setActiveTask(null);
     const { active, over } = event;
-    if (!over) return;
-
     const activeId = active.id;
-    const overId = over.id;
+    const overId = over?.id;
+    if (!over || activeId === overId) return;
 
-    if (activeId === overId) return;
+    const oldIndex = columns.findIndex((col) => col.id === active.id);
+    const newIndex = columns.findIndex((col) => col.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
 
-    setColumns((columns) => {
-      const activeColumnIndex = columns.findIndex(
-        (column) => column.id === activeId
-      );
-      const overColumnIndex = columns.findIndex(
-        (column) => column.id === overId
-      );
-
-      return arrayMove(columns, activeColumnIndex, overColumnIndex);
-    });
+    const newOrder = arrayMove(columns, oldIndex, newIndex);
+    dispatch(reorderColumns(newOrder));
 
     setActiveColumn(null); // Limpiamos el estado activo
   }
@@ -202,7 +202,7 @@ export default function TaskBoard() {
             </SortableContext>
 
             <button
-              onClick={createColumn}
+              onClick={() => hanbleAddColumn("New Column")}
               className="bg-sky-500 text-white font-bold py-2 px-4 rounded hover:bg-sky-600 transition duration-200 min-w-[250px] h-[50px] ring-blue-600 hover:ring-2 flex gap-4 items-center"
             >
               <PlusIcon />

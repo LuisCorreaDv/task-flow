@@ -2,6 +2,7 @@
 
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import authReducer from '@/redux/features/authSlice';
+import columnReducer from '@/redux/features/columnSlice'
 import {
   persistStore,
   persistReducer,
@@ -15,13 +16,16 @@ import {
 import storage from 'redux-persist/lib/storage';
 
 //
-const rootReducer = combineReducers({ auth: authReducer });
+const rootReducer = combineReducers({ 
+  auth: authReducer,
+  columns: columnReducer,
+});
 
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'],
+  whitelist: ['auth', 'columns'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
