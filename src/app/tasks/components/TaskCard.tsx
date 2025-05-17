@@ -10,6 +10,7 @@ interface TaskCardProps {
   updateTask: (id: Id, content: string) => void;
 }
 
+
 function TaskCard({ task, deleteTask, updateTask }: TaskCardProps) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -40,12 +41,14 @@ function TaskCard({ task, deleteTask, updateTask }: TaskCardProps) {
     setMouseIsOver(false);
   };
 
-  if(isDragging) {
+  if (isDragging) {
     return (
-        <div ref={setNodeRef} style={stlye} className="bg-white h-[75px] min-h-[75px] rounded-lg border-2 border-dashed opacity-50" >
-
-        </div>
-    )
+      <div
+        ref={setNodeRef}
+        style={stlye}
+        className="bg-white h-[75px] min-h-[75px] rounded-lg border-2 border-dashed opacity-50"
+      ></div>
+    );
   }
 
   if (editMode) {
@@ -73,7 +76,7 @@ function TaskCard({ task, deleteTask, updateTask }: TaskCardProps) {
   }
 
   return (
-    <div
+    <article
       ref={setNodeRef}
       style={stlye}
       {...attributes}
@@ -97,7 +100,7 @@ function TaskCard({ task, deleteTask, updateTask }: TaskCardProps) {
           <DeleteIcon />
         </button>
       )}
-    </div>
+    </article>
   );
 }
 

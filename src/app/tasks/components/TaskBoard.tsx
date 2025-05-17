@@ -3,7 +3,12 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/redux/store";
-import { addColumn, reorderColumns, updateColumn, deleteColumn } from "@/redux/features/columnSlice";
+import {
+  addColumn,
+  reorderColumns,
+  updateColumn,
+  deleteColumn,
+} from "@/redux/features/columnSlice";
 import PlusIcon from "@/Icons/PlusIcon";
 import { Column, Id, Task } from "@/types/TaskTypes";
 import { useMemo, useState, useEffect } from "react";
@@ -24,7 +29,6 @@ import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 
 export default function TaskBoard() {
-
   const dispatch: AppDispatch = useDispatch();
   const columns = useSelector((state: RootState) => state.columns.columns);
 
@@ -54,17 +58,21 @@ export default function TaskBoard() {
     })
   );
 
+  function generateId() {
+    return Math.floor(Math.random() * 10000);
+  }
+
   const hanbleAddColumn = (title: string) => {
     dispatch(addColumn(title));
   };
 
   const handleEditColumn = (id: Id, title: string) => {
-    dispatch(updateColumn({id, title}))
-  }
+    dispatch(updateColumn({ id, title }));
+  };
 
   const handleDeleteColumn = (id: Id) => {
-    dispatch(deleteColumn({id}))
-  }
+    dispatch(deleteColumn({ id }));
+  };
 
   function deleteTask(id: Id) {
     const newTasks = tasks.filter((task) => task.id !== id);
