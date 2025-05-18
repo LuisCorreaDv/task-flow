@@ -169,7 +169,7 @@ export default function TaskBoard() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col py-1 px-6">
       {/* Tasks Section */}
       <DndContext
         sensors={sensors}
@@ -177,8 +177,8 @@ export default function TaskBoard() {
         onDragEnd={onDragEnd}
         onDragOver={onDragOver}
       >
-        <section className="flex-1 mt-4 overflow-auto">
-          <div className="flex gap-4 overflow-y-hidden overflow-x-auto h-full">
+        <section className="min-w-full">
+          <div className="flex gap-4 items-start">
             <SortableContext items={columnsId}>
               {columns.map((column) => (
                 <ColumnContainer

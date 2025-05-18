@@ -110,7 +110,7 @@ function ColumnContainer(props: ColumnContainerProps) {
       </header>
 
       {/* Column content */}
-      <section className="flex flex-grow flex-col gap-2 p-2 overflow-x-hidden overflow-y-auto">
+      <section className="flex flex-grow flex-col gap-4 p-2 overflow-x-hidden overflow-y-auto">
         <SortableContext items={tasksIds}>
           {tasks.map((task) => {
             return (

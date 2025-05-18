@@ -14,7 +14,7 @@ function Header() {
   return (
     <header>
       <nav className="bg-white border-gray-200 dark:bg-gray-900">
-        <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
+        <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-6">
           <a
             href="https://flowbite.com"
             className="flex items-center space-x-3 rtl:space-x-reverse"

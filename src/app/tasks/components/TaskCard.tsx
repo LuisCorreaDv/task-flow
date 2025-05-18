@@ -53,15 +53,16 @@ function TaskCard({ task, deleteTask, updateTask }: TaskCardProps) {
 
   if (editMode) {
     return (
-      <div
+      <article
         ref={setNodeRef}
         style={stlye}
         {...attributes}
         {...listeners}
-        className="bg-white rounded-lg p-3 shadow-sm hover:bg-gray-50 border-2 border-transparent hover:border-gray-200 transition-colors duration-200 flex text-left cursor-grab"
+        className="bg-white h-[100px] min-h-[100px] items-center flex text-left flex-col rounded-lg px-3 py-5 shadow-sm hover:bg-gray-50  border-transparent hover:border-gray-200 transition-colors duration-200 cursor-grab relative"
       >
+        <header className="h-4 w-[75%] rounded-b-full bg-gray-200 absolute top-0"></header>
         <textarea
-          className="h-[90%] w-full resize-none border-none rounded bg-transparent text-gray-600 focus:outline-none"
+          className="h-[90%] w-full resize-none border-none rounded bg-transparent text-gray-600 focus:outline-none text-sm"
           value={task.content}
           autoFocus
           placeholder="Task content here"
@@ -71,7 +72,7 @@ function TaskCard({ task, deleteTask, updateTask }: TaskCardProps) {
           }}
           onChange={(e) => updateTask(task.id, e.target.value)}
         ></textarea>
-      </div>
+      </article>
     );
   }
 
@@ -84,9 +85,10 @@ function TaskCard({ task, deleteTask, updateTask }: TaskCardProps) {
       onClick={toggleEditMode}
       onMouseOver={() => setMouseIsOver(true)}
       onMouseLeave={() => setMouseIsOver(false)}
-      className="bg-white h-[75px] min-h-[75px] items-center flex text-left rounded-lg p-3 shadow-sm hover:bg-gray-50 border-2 border-transparent hover:border-gray-200 transition-colors duration-200 cursor-grab relative"
+      className="bg-white h-[100px] min-h-[100px] items-center flex text-left flex-col rounded-lg px-3 py-5 shadow-sm hover:bg-gray-50  border-transparent hover:border-gray-200 transform transition-transform duration-300 hover:translate-y-[-5px]  cursor-grab relative"
     >
-      <p className=" my-auto h-[90%] w-full overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words">
+      <header className="h-4 w-[75%] rounded-b-full bg-gray-200 absolute top-0"></header>
+      <p className=" my-auto h-[90%] w-full overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words text-sm">
         {task.content}
       </p>
 

@@ -7,7 +7,7 @@ export default function TasksPage() {
   return (
     <div className='flex flex-col h-screen'>
       <Header />
-      <div className='flex-1'>
+      <div className='flex-1 overflow-y-hidden overflow-x-auto'>
         <TaskBoard />
       </div>
     </div>
