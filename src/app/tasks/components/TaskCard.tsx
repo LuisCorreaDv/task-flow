@@ -1,4 +1,5 @@
 import DeleteIcon from "@/Icons/DeleteIcon";
+import StarIcon from "@/Icons/StarIcon";
 import { Id, Task, TaskStatus } from "@/types/TaskTypes";
 import { useSortable } from "@dnd-kit/sortable";
 import { useState } from "react";
@@ -9,6 +10,7 @@ interface TaskCardProps {
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
   updateStatus: (id: Id, status: string) => void;
+  toggleFavorite: (id: Id) => void;
 }
 
 function TaskCard({
@@ -16,6 +18,7 @@ function TaskCard({
   deleteTask,
   updateTask,
   updateStatus,
+  toggleFavorite,
 }: TaskCardProps) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -144,7 +147,16 @@ function TaskCard({
       onMouseLeave={() => setMouseIsOver(false)}
       className="bg-white h-[100px] min-h-[100px] items-center flex text-left flex-col rounded-lg px-3 py-5 shadow-sm hover:bg-gray-50  border-transparent hover:border-gray-200 transform transition-transform duration-300 hover:translate-y-[-5px]  cursor-grab relative"
     >
-      {" "}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleFavorite(task.id);
+        }}
+        className="absolute bottom-2 left-2 cursor-pointer text-yellow-500 hover:text-yellow-600 transition"
+        aria-label="Toggle favorite"
+      >
+        <StarIcon filled={task.isFavorite} />
+      </button>{" "}
       <header
         className={`h-4 w-[75%] rounded-b-full absolute top-0 ${
           statusColors[task.status as TaskStatus] ?? statusColors.default
@@ -158,7 +170,7 @@ function TaskCard({
           onClick={() => {
             deleteTask(task.id);
           }}
-          className="absolute top-2 right-2 cursor-pointer stroke-gray-600 opacity-60 hover:stroke-gray-900 hover:opacity-100 transition duration-200"
+          className="absolute top-1 right-1 cursor-pointer stroke-gray-600 opacity-60 hover:stroke-gray-900 hover:opacity-100 transition duration-200"
         >
           <DeleteIcon />
         </button>

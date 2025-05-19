@@ -18,10 +18,11 @@ interface ColumnContainerProps {
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
   updateStatus: (id: Id, status: string) => void;
+  toggleFavorite: (id: Id) => void;
 }
 
 function ColumnContainer(props: ColumnContainerProps) {
-  const { column, createTask, tasks, deleteTask, updateTask, updateStatus } =
+  const { column, createTask, tasks, deleteTask, updateTask, updateStatus, toggleFavorite } =
     props;
 
   const dispatch = useAppDispatch();
@@ -118,6 +119,7 @@ function ColumnContainer(props: ColumnContainerProps) {
                 deleteTask={deleteTask}
                 updateTask={updateTask}
                 updateStatus={updateStatus}
+                toggleFavorite={toggleFavorite}
               />
             );
           })}

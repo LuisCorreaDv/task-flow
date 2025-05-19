@@ -175,6 +175,13 @@ export default function TaskBoard() {
     });
     setTasks(newTasks);
   }
+  function toggleFavorite(id: Id) {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === id ? { ...task, isFavorite: !task.isFavorite } : task
+      )
+    )
+  }
 
   return (
     <div className="h-full flex flex-col py-1 px-6">
@@ -197,6 +204,7 @@ export default function TaskBoard() {
                   createTask={createTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
+                  toggleFavorite={toggleFavorite}
                   updateStatus={updateTaskStatus}
                   tasks={tasks.filter((task) => task.columnId === column.id)}
                 />
@@ -224,6 +232,7 @@ export default function TaskBoard() {
                   deleteTask={deleteTask}
                   updateTask={updateTask}
                   updateStatus={updateTaskStatus}
+                  toggleFavorite={toggleFavorite}
                   tasks={tasks.filter(
                     (task) => task.columnId === activeColumn.id
                   )}
@@ -235,6 +244,7 @@ export default function TaskBoard() {
                   deleteTask={deleteTask}
                   updateTask={updateTask}
                   updateStatus={updateTaskStatus}
+                  toggleFavorite={toggleFavorite}
                 />
               )}
             </DragOverlay>,
