@@ -1,5 +1,5 @@
 export type Id = string | number;
-export type TaskStatus = "on_time" | "delayed" | "on_going" | "urgent";
+export type TaskStatus = "on_time" | "delayed" | "on_going" | "urgent" | "default";
 
 export type Column = {
     id: Id;

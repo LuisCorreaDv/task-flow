@@ -10,31 +10,27 @@ import { deleteColumn, updateColumn } from "@/redux/features/columnSlice";
 
 interface ColumnContainerProps {
   column: Column;
-  updateColumn: (id: Id, title: string) => void
-  deleteColumn: (id: Id) => void
+  updateColumn: (id: Id, title: string) => void;
+  deleteColumn: (id: Id) => void;
 
   createTask: (columnId: Id) => void;
   tasks: Task[];
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
+  updateStatus: (id: Id, status: string) => void;
 }
 
 function ColumnContainer(props: ColumnContainerProps) {
-  const {
-    column,
-    createTask,
-    tasks,
-    deleteTask,
-    updateTask,
-  } = props;
+  const { column, createTask, tasks, deleteTask, updateTask, updateStatus } =
+    props;
 
   const dispatch = useAppDispatch();
 
   const [editMode, setEditMode] = useState(false);
 
   const tasksIds = useMemo(() => {
-    return tasks.map((task) => task.id)
-  }, [tasks])
+    return tasks.map((task) => task.id);
+  }, [tasks]);
 
   const {
     setNodeRef,
@@ -85,7 +81,9 @@ function ColumnContainer(props: ColumnContainerProps) {
           <input
             className="bg-[#f1f2f4] w-[80%] border-none rounded-md py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] hover:shadow-[inset_0_1px_4px_rgba(0,0,0,0.3)] transition-shadow duration-200"
             value={column.title}
-            onChange={(e) => dispatch(updateColumn({id: column.id, title: e.target.value}))}
+            onChange={(e) =>
+              dispatch(updateColumn({ id: column.id, title: e.target.value }))
+            }
             autoFocus
             onBlur={() => {
               setEditMode(false);
@@ -102,7 +100,7 @@ function ColumnContainer(props: ColumnContainerProps) {
           className="cursor-pointer stroke-gray-600 hover:stroke-gray-900 transition duration-200"
           onClick={(e) => {
             e.stopPropagation();
-            dispatch(deleteColumn({ id: column.id }))
+            dispatch(deleteColumn({ id: column.id }));
           }}
         >
           <DeleteIcon />
@@ -119,6 +117,7 @@ function ColumnContainer(props: ColumnContainerProps) {
                 task={task}
                 deleteTask={deleteTask}
                 updateTask={updateTask}
+                updateStatus={updateStatus}
               />
             );
           })}

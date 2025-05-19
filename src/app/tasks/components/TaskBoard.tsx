@@ -10,7 +10,7 @@ import {
   deleteColumn,
 } from "@/redux/features/columnSlice";
 import PlusIcon from "@/Icons/PlusIcon";
-import { Column, Id, Task } from "@/types/TaskTypes";
+import { Column, Id, Task, TaskStatus } from "@/types/TaskTypes";
 import { useMemo, useState, useEffect } from "react";
 import React from "react";
 import ColumnContainer from "./ColumnContainer";
@@ -155,6 +155,7 @@ export default function TaskBoard() {
       id: generateId(),
       content: `Task ${tasks.length + 1}`,
       columnId,
+      status: "default",
     };
     setTasks([...tasks, newTask]);
   }
@@ -164,7 +165,14 @@ export default function TaskBoard() {
       if (task.id !== id) return task;
       return { ...task, content };
     });
+    setTasks(newTasks);
+  }
 
+  function updateTaskStatus(id: Id, status: string) {
+    const newTasks = tasks.map((task) => {
+      if (task.id !== id) return task;
+      return { ...task, status: status as TaskStatus };
+    });
     setTasks(newTasks);
   }
 
@@ -189,6 +197,7 @@ export default function TaskBoard() {
                   createTask={createTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
+                  updateStatus={updateTaskStatus}
                   tasks={tasks.filter((task) => task.columnId === column.id)}
                 />
               ))}
@@ -214,16 +223,18 @@ export default function TaskBoard() {
                   createTask={createTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
+                  updateStatus={updateTaskStatus}
                   tasks={tasks.filter(
                     (task) => task.columnId === activeColumn.id
                   )}
                 />
-              )}
+              )}{" "}
               {activeTask && (
                 <TaskCard
                   task={activeTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
+                  updateStatus={updateTaskStatus}
                 />
               )}
             </DragOverlay>,
