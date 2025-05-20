@@ -9,7 +9,7 @@ interface TaskCardProps {
   task: Task;
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
-  updateStatus: (id: Id, status: string) => void;
+  updateStatus: (id: Id, status: TaskStatus) => void;
   toggleFavorite: (id: Id) => void;
 }
 
@@ -110,7 +110,7 @@ function TaskCard({
           onChange={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            updateStatus(task.id, e.target.value);
+            updateStatus(task.id, e.target.value as TaskStatus);
             setIsSelectingStatus(false);
           }}
           onMouseDown={(e) => {

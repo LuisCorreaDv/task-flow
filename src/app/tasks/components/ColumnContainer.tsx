@@ -1,6 +1,6 @@
 import AddIcon from "@/Icons/AddIcon";
 import DeleteIcon from "@/Icons/DeleteIcon";
-import { Column, Id, Task } from "@/types/TaskTypes";
+import { Column, Id, Task, TaskStatus } from "@/types/TaskTypes";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
@@ -17,7 +17,7 @@ interface ColumnContainerProps {
   tasks: Task[];
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
-  updateStatus: (id: Id, status: string) => void;
+  updateStatus: (id: Id, status: TaskStatus) => void;
   toggleFavorite: (id: Id) => void;
 }
 

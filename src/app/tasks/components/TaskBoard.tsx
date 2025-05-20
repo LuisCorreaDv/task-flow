@@ -3,12 +3,25 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/redux/store";
+// Columns
 import {
   addColumn,
   reorderColumns,
   updateColumn,
   deleteColumn,
 } from "@/redux/features/columnSlice";
+
+// Tasks
+import { generateTaskId } from "@/utils/generateTaskId";
+import {
+  addTask as addTaskAction,
+  deleteTask as deleteTaskAction,
+  updateTask as updateTaskAction,
+  updateTaskStatus as updateTaskStatusAction,
+  toggleFavorite as toggleFavoriteAction,
+  updateTaskColumn,
+  selectTasks,
+} from "@/redux/features/taskSlice";
 import PlusIcon from "@/Icons/PlusIcon";
 import { Column, Id, Task, TaskStatus } from "@/types/TaskTypes";
 import { useMemo, useState, useEffect } from "react";
@@ -31,11 +44,11 @@ import TaskCard from "./TaskCard";
 export default function TaskBoard() {
   const dispatch: AppDispatch = useDispatch();
   const columns = useSelector((state: RootState) => state.columns.columns);
-
-  // const [columns, setColumns] = useState<Column[]>([]);
+  const userId = useSelector((state: RootState) => state.auth.token);
   const [mounted, setMounted] = useState(false);
-
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const tasks = useSelector((state: RootState) =>
+    selectTasks(state, userId || "")
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -58,10 +71,7 @@ export default function TaskBoard() {
     })
   );
 
-  function generateId() {
-    return Math.floor(Math.random() * 10000);
-  }
-
+  //Columns functions
   const hanbleAddColumn = (title: string) => {
     dispatch(addColumn(title));
   };
@@ -74,13 +84,46 @@ export default function TaskBoard() {
     dispatch(deleteColumn({ id }));
   };
 
+  //Tasks functions
+  function addTask(columnId: Id) {
+    if (!userId) return;
+
+    const task: Task = {
+      id: generateTaskId(userId),
+      content: "Add a Task",
+      columnId,
+      status: "default" as TaskStatus,
+      isFavorite: false,
+      type: "task",
+      parentId: null,
+    };
+
+    dispatch(addTaskAction({ userId, task }));
+    console.log(task);
+  };
+
   function deleteTask(id: Id) {
-    const newTasks = tasks.filter((task) => task.id !== id);
-    setTasks(newTasks);
+    if (!userId) return;
+    dispatch(deleteTaskAction({ userId, taskId: id }));
   }
 
+  function updateTask(id: Id, content: string) {
+    if (!userId) return;
+    dispatch(updateTaskAction({ userId, taskId: id, content }));
+  }
+
+  function updateTaskStatus(id: Id, status: TaskStatus) {
+    if (!userId) return;
+    dispatch(updateTaskStatusAction({ userId, taskId: id, status }));
+  }
+
+  function toggleFavorite(id: Id) {
+    if (!userId) return;
+    dispatch(toggleFavoriteAction({ userId, taskId: id }));
+  }
+
+  //Drag and Drop functions
   function onDragStart(event: DragStartEvent) {
-    console.log("DragStart", event);
     if (event.active.data.current?.type === "Column") {
       setActiveColumn(event.active.data.current.column);
       return;
@@ -107,12 +150,12 @@ export default function TaskBoard() {
     const newOrder = arrayMove(columns, oldIndex, newIndex);
     dispatch(reorderColumns(newOrder));
 
-    setActiveColumn(null); // Limpiamos el estado activo
+    setActiveColumn(null);
   }
 
   function onDragOver(event: DragOverEvent) {
     const { active, over } = event;
-    if (!over) return;
+    if (!over || !userId) return;
 
     const activeId = active.id;
     const overId = over.id;
@@ -126,61 +169,30 @@ export default function TaskBoard() {
 
     //Drop a Task over another task
     if (isActiveTask && isOverTask) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((task) => task.id === activeId);
-        const overIndex = tasks.findIndex((task) => task.id === overId);
-
-        tasks[activeIndex].columnId = tasks[overIndex].columnId;
-
-        return arrayMove(tasks, activeIndex, overIndex);
-      });
+      const overTask = tasks.find((task: Task) => task.id === overId);
+      if (overTask) {
+        dispatch(
+          updateTaskColumn({
+            userId,
+            taskId: activeId as Id,
+            newColumnId: overTask.columnId,
+          })
+        );
+      }
     }
 
     const isOverAColumn = over.data.current?.type === "Column";
 
     //Drop a task over a column
     if (isActiveTask && isOverAColumn) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((task) => task.id === activeId);
-
-        tasks[activeIndex].columnId = overId;
-
-        return arrayMove(tasks, activeIndex, activeIndex);
-      });
+      dispatch(
+        updateTaskColumn({
+          userId,
+          taskId: activeId as Id,
+          newColumnId: overId as Id,
+        })
+      );
     }
-  }
-
-  function createTask(columnId: Id) {
-    const newTask: Task = {
-      id: generateId(),
-      content: `Task ${tasks.length + 1}`,
-      columnId,
-      status: "default",
-    };
-    setTasks([...tasks, newTask]);
-  }
-
-  function updateTask(id: Id, content: string) {
-    const newTasks = tasks.map((task) => {
-      if (task.id !== id) return task;
-      return { ...task, content };
-    });
-    setTasks(newTasks);
-  }
-
-  function updateTaskStatus(id: Id, status: string) {
-    const newTasks = tasks.map((task) => {
-      if (task.id !== id) return task;
-      return { ...task, status: status as TaskStatus };
-    });
-    setTasks(newTasks);
-  }
-  function toggleFavorite(id: Id) {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, isFavorite: !task.isFavorite } : task
-      )
-    )
   }
 
   return (
@@ -201,12 +213,14 @@ export default function TaskBoard() {
                   key={column.id}
                   updateColumn={handleEditColumn}
                   deleteColumn={handleDeleteColumn}
-                  createTask={createTask}
+                  createTask={addTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
                   toggleFavorite={toggleFavorite}
                   updateStatus={updateTaskStatus}
-                  tasks={tasks.filter((task) => task.columnId === column.id)}
+                  tasks={tasks.filter(
+                    (task: Task) => task.columnId === column.id
+                  )}
                 />
               ))}
             </SortableContext>
@@ -228,13 +242,13 @@ export default function TaskBoard() {
                   column={activeColumn}
                   updateColumn={handleEditColumn}
                   deleteColumn={handleDeleteColumn}
-                  createTask={createTask}
+                  createTask={addTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
                   updateStatus={updateTaskStatus}
                   toggleFavorite={toggleFavorite}
                   tasks={tasks.filter(
-                    (task) => task.columnId === activeColumn.id
+                    (task: Task) => task.columnId === activeColumn.id
                   )}
                 />
               )}{" "}

@@ -24,8 +24,11 @@ const columnSlice = createSlice({
       const newColumn: Column = {
         id: generateId(),
         title: action.payload,
+        type: "column",
+        taskIds: [],
+        parentId: null
       };
-      state.columns.push(newColumn);
+      state.columns.push(newColumn);      
     },
     updateColumn: (state, action: PayloadAction<{id: Id, title: string}>) => {
         const column = state.columns.find((column) => column.id === action.payload.id)
