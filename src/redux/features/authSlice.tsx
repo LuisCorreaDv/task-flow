@@ -25,11 +25,11 @@ export const loginUser = createAsyncThunk(
       setTimeout(resolve, Math.random() * 2000 + 500)
     );
 
-    const response = await fetch("https://reqres.in/api/login", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "reqres-free-v1",
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY as string,
       },
       body: JSON.stringify({ email, password }),
     });
