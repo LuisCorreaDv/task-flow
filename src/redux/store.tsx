@@ -4,6 +4,7 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import authReducer from '@/redux/features/authSlice';
 import columnReducer from '@/redux/features/columnSlice'
 import taskReducer from '@/redux/features/taskSlice';
+import verificationReducer from '@/redux/features/verificationSlice';
 import {
   persistStore,
   persistReducer,
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   columns: columnReducer,
   tasks: taskReducer,
+  verification: verificationReducer,
 });
 
 

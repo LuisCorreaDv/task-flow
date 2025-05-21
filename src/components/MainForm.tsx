@@ -17,7 +17,7 @@ function MainForm() {
   useEffect(() => {
     // Redirect to tasks route if token is present
     if (token) {
-      router.push("/tasks");
+      router.push("/Verify");
     }
   }, [token, router]);
 

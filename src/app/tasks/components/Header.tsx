@@ -2,6 +2,7 @@ import React from "react";
 import { logout } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
+import { resetVerification } from "@/redux/features/verificationSlice";
 
 function Header() {
   const dispatch = useDispatch();
@@ -9,6 +10,7 @@ function Header() {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(resetVerification())
     router.push("/");
   };
   return (
