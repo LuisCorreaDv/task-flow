@@ -16,8 +16,8 @@ import {
   REGISTER,
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+import { encryptToken, decryptToken } from '@/utils/encryption';
 
-//
 const rootReducer = combineReducers({ 
   auth: authReducer,
   columns: columnReducer,
@@ -25,11 +25,23 @@ const rootReducer = combineReducers({
   verification: verificationReducer,
 });
 
+// Custom transform to encrypt/decrypt the token
+// This transform will encrypt the token when saving to storage and decrypt it when loading from storage
+const encryptTransform = {
+  in: (state: { token?: string }) => {
+    return state?.token ? { ...state, token: encryptToken(state.token) } : state;
+  },
+  out: (state: { token?: string }) => {
+    return state?.token ? { ...state, token: decryptToken(state.token) } : state;
+  }
+};
 
 const persistConfig = {
   key: 'root',
   storage,
   whitelist: ['auth', 'columns', 'tasks'],
+  // Use the custom transform for the auth slice
+  transforms: [encryptTransform],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
