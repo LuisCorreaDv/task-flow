@@ -10,21 +10,17 @@ function Header() {
 
   const handleLogout = () => {
     dispatch(logout());
-    dispatch(resetVerification())
+    dispatch(resetVerification());
     router.push("/");
   };
   return (
     <header>
       <nav className="bg-white border-gray-200 dark:bg-gray-900">
         <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-6">
-          <a
-            href="https://flowbite.com"
-            className="flex items-center space-x-3 rtl:space-x-reverse"
-          >
-            <span className="self-center text-4xl font-semibold whitespace-nowrap dark:text-white text-center bg-gradient-to-r from-cyan-300 to-sky-800 bg-clip-text text-transparent">
-              Task Flow
-            </span>
-          </a>
+          <span className="self-center text-4xl font-semibold whitespace-nowrap dark:text-white text-center bg-gradient-to-r from-cyan-300 to-sky-800 bg-clip-text text-transparent">
+            Task Flow
+          </span>
+
           <div className="flex items-center space-x-6 rtl:space-x-reverse">
             <button
               type="button"

@@ -41,7 +41,13 @@ import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 
-export default function TaskBoard() {
+//Search and Filter Props
+interface TaskBoardProps {
+  searchTerm?: string;
+  statusFilter?: TaskStatus | 'all';
+}
+
+export default function TaskBoard({ searchTerm = '', statusFilter = 'all' }: TaskBoardProps) {
   const dispatch: AppDispatch = useDispatch();
   const columns = useSelector((state: RootState) => state.columns.columns);
   const userId = useSelector((state: RootState) => state.auth.token);
@@ -54,7 +60,26 @@ export default function TaskBoard() {
     setMounted(true);
   }, []);
 
-  //useMemo is used to memoize the columnsId array, so it only recalculates when columns change
+  // Filter tasks based on search term and status
+  // useMemo is used to memorize the filteredTasks array, so it only recalculates when tasks, searchTerm, or statusFilter change
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task: Task) => {
+      // Filter by search term (task content)
+      const matchesSearch = searchTerm
+        ? task.content.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
+
+      // Filter by task status
+      const matchesStatus = statusFilter === 'all'
+        ? true
+        : task.status === statusFilter;
+
+      // The task must match both the search term and the status filter
+      return matchesSearch && matchesStatus;
+    });
+  }, [tasks, searchTerm, statusFilter]);
+
+  //useMemo is used to memorize the columnsId array, so it only recalculates when columns change
   // This is useful for performance optimization, as it prevents unnecessary re-renders
   const columnsId = useMemo(
     () => columns.map((column) => column.id),
@@ -169,7 +194,7 @@ export default function TaskBoard() {
 
     //Drop a Task over another task
     if (isActiveTask && isOverTask) {
-      const overTask = tasks.find((task: Task) => task.id === overId);
+      const overTask = filteredTasks.find((task: Task) => task.id === overId);
       if (overTask) {
         dispatch(
           updateTaskColumn({
@@ -218,7 +243,7 @@ export default function TaskBoard() {
                   updateTask={updateTask}
                   toggleFavorite={toggleFavorite}
                   updateStatus={updateTaskStatus}
-                  tasks={tasks.filter(
+                  tasks={filteredTasks.filter(
                     (task: Task) => task.columnId === column.id
                   )}
                 />
@@ -247,7 +272,7 @@ export default function TaskBoard() {
                   updateTask={updateTask}
                   updateStatus={updateTaskStatus}
                   toggleFavorite={toggleFavorite}
-                  tasks={tasks.filter(
+                  tasks={filteredTasks.filter(
                     (task: Task) => task.columnId === activeColumn.id
                   )}
                 />
