@@ -45,9 +45,14 @@ import TaskCard from "./TaskCard";
 interface TaskBoardProps {
   searchTerm?: string;
   statusFilter?: TaskStatus | 'all';
+  favoritesOnly?: boolean;
 }
 
-export default function TaskBoard({ searchTerm = '', statusFilter = 'all' }: TaskBoardProps) {
+export default function TaskBoard({ 
+  searchTerm = '', 
+  statusFilter = 'all',
+  favoritesOnly = false 
+}: TaskBoardProps) {
   const dispatch: AppDispatch = useDispatch();
   const columns = useSelector((state: RootState) => state.columns.columns);
   const userId = useSelector((state: RootState) => state.auth.token);
@@ -59,9 +64,8 @@ export default function TaskBoard({ searchTerm = '', statusFilter = 'all' }: Tas
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Filter tasks based on search term and status
-  // useMemo is used to memorize the filteredTasks array, so it only recalculates when tasks, searchTerm, or statusFilter change
+  // Filter tasks based on search term, status and favorites
+  // useMemo is used to memorize the filteredTasks array, so it only recalculates when tasks, searchTerm, statusFilter, or favoritesOnly change
   const filteredTasks = useMemo(() => {
     return tasks.filter((task: Task) => {
       // Filter by search term (task content)
@@ -73,11 +77,16 @@ export default function TaskBoard({ searchTerm = '', statusFilter = 'all' }: Tas
       const matchesStatus = statusFilter === 'all'
         ? true
         : task.status === statusFilter;
+        
+      // Filter by favorites
+      const matchesFavorites = favoritesOnly 
+        ? task.isFavorite 
+        : true;
 
-      // The task must match both the search term and the status filter
-      return matchesSearch && matchesStatus;
+      // The task must match all three filters
+      return matchesSearch && matchesStatus && matchesFavorites;
     });
-  }, [tasks, searchTerm, statusFilter]);
+  }, [tasks, searchTerm, statusFilter, favoritesOnly]);
 
   //useMemo is used to memorize the columnsId array, so it only recalculates when columns change
   // This is useful for performance optimization, as it prevents unnecessary re-renders

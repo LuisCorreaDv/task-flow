@@ -8,6 +8,7 @@ import { TaskStatus } from '@/types/TaskTypes';
 export default function TasksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -17,6 +18,9 @@ export default function TasksPage() {
     setStatusFilter(status);
   };
 
+  const handleFilterFavorites = (showFavoritesOnly: boolean) => {
+    setFavoritesOnly(showFavoritesOnly);
+  };
   return (
     <div className='flex flex-col h-screen'>
       <Header />
@@ -24,10 +28,12 @@ export default function TasksPage() {
         <TaskFilter 
           onSearch={handleSearch} 
           onFilterStatus={handleFilterStatus} 
+          onFilterFavorites={handleFilterFavorites}
         />
         <TaskBoard 
           searchTerm={searchTerm} 
           statusFilter={statusFilter} 
+          favoritesOnly={favoritesOnly}
         />
       </div>
     </div>
