@@ -4,6 +4,8 @@ import { Id, Task, TaskStatus } from "@/types/TaskTypes";
 import { useSortable } from "@dnd-kit/sortable";
 import { useState } from "react";
 import { CSS } from "@dnd-kit/utilities";
+import { validateTaskContent } from "@/utils/validations";
+import { useAppSelector } from "@/redux/hooks";
 
 interface TaskCardProps {
   task: Task;
@@ -24,6 +26,13 @@ function TaskCard({
   const [editMode, setEditMode] = useState(false);
   const [isSelectingStatus, setIsSelectingStatus] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<Id | null>(null);
+  const [tempContent, setTempContent] = useState(task.content);
+  
+  // Get the user ID from the Redux store and the tasks for that user
+  const userId = useAppSelector((state) => state.auth.token);
+  const allTasks = useAppSelector((state) => 
+    userId ? state.tasks[userId]?.tasks || {} : {}
+  );
 
   const statusColors: Record<TaskStatus, string> = {
     on_time: "bg-green-100",
@@ -58,6 +67,7 @@ function TaskCard({
     if (!isSelectingStatus) {
       setEditMode((prev) => !prev);
       setMouseIsOver(false);
+      setTempContent(task.content);
     }
   };
 
@@ -69,7 +79,28 @@ function TaskCard({
         className="bg-white h-[100px] min-h-[100px] rounded-lg border-2 border-dashed opacity-50"
       ></div>
     );
-  }
+  }  const handleContentValidation = (force = false) => {
+    const isValid = validateTaskContent(tempContent);
+
+    // Check for duplicate content
+    const isDuplicate = Object.values(allTasks).some(
+      selectedTask => selectedTask.id !== task.id && selectedTask.content.trim().toLowerCase() === tempContent.trim().toLowerCase()
+    );
+    
+    if (isDuplicate) {
+      if (force) {
+        window.alert("A task with the same content already exists");
+      }
+      return;
+    }
+    
+    if (isValid) {
+      updateTask(task.id, tempContent.trim());
+      setEditMode(false);
+    } else if (force) {
+      window.alert("Task content must be between 3 and 50 characters long and contain no special characters.");
+    }
+  };
 
   if (editMode) {
     return (
@@ -85,26 +116,34 @@ function TaskCard({
           className={`h-4 w-[75%] rounded-b-full absolute top-0 ${
             statusColors[task.status as TaskStatus] ?? statusColors.default
           }`}
-        ></header>
+        ></header>{" "}
         <textarea
           className="h-[90%] w-full resize-none border-none rounded bg-transparent text-gray-600 focus:outline-none text-sm"
-          value={task.content}
+          value={tempContent}
           autoFocus
           placeholder="Task content here"
+          onFocus={(e) => {
+            e.target.select();
+          }}
           onBlur={(e) => {
             const relatedTarget = e.relatedTarget as HTMLElement;
             if (
               !relatedTarget ||
               (!relatedTarget?.closest("select") && !isSelectingStatus)
             ) {
-              toggleEditMode();
+              handleContentValidation(false);
             }
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && e.shiftKey) toggleEditMode();
+            if (e.key === "Enter" && e.shiftKey) {
+              e.preventDefault();
+              handleContentValidation(true);
+            }
             if (e.key === "Escape") toggleEditMode();
           }}
-          onChange={(e) => updateTask(task.id, e.target.value)}
+          onChange={(e) => {
+            setTempContent(e.target.value);
+          }}
         ></textarea>
         <select
           value={task.status}
@@ -192,7 +231,10 @@ function TaskCard({
           <div className="relative p-4 w-full max-w-2xl max-h-full">
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 id="modal-title" className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h3
+                  id="modal-title"
+                  className="text-xl font-semibold text-gray-900 dark:text-white"
+                >
                   Delete Task
                 </h3>
                 <button
@@ -200,13 +242,12 @@ function TaskCard({
                   aria-label="Close modal"
                   className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                   onClick={() => setSelectedTaskId(null)}
-                >
-                </button>
+                ></button>
               </div>
               <div className="p-4 md:p-5">
                 <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                  Are you sure you want to delete this task? This action cannot be
-                  undone.
+                  Are you sure you want to delete this task? This action cannot
+                  be undone.
                 </p>
               </div>
               <div className="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
