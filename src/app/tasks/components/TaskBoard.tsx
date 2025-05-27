@@ -130,6 +130,8 @@ export default function TaskBoard({
       isFavorite: false,
       type: "task",
       parentId: null,
+      version: 0,
+      lastModified: 0
     };
 
     dispatch(addTaskAction({ userId, task }));
