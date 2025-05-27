@@ -6,6 +6,8 @@ import { useState } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { validateTaskContent } from "@/utils/validations";
 import { useAppSelector } from "@/redux/hooks";
+// import { compress, decompress } from "@/utils/compression";
+// import { useEffect } from "react";
 
 interface TaskCardProps {
   task: Task;
@@ -27,7 +29,26 @@ function TaskCard({
   const [isSelectingStatus, setIsSelectingStatus] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<Id | null>(null);
   const [tempContent, setTempContent] = useState(task.content);
+
   
+  // -----   Show compress task data -------
+  // const showTaskData = () => {
+  //   console.group(`Task Data - ID: ${task.id}`);
+  //   console.log('Original task content:', task);
+    
+  //   const compressedTask = compress(task);
+  //   console.log('Compressed task content:', compressedTask);
+
+  //   const decompressedTask = decompress(compressedTask);
+  //   console.log('Decompressed task content:', decompressedTask);
+  // };
+
+  // // Ejecutar la función cuando el componente se monte
+  // useEffect(() => {
+  //   showTaskData();
+  // }, [task]);
+
+
   // Get the user ID from the Redux store and the tasks for that user
   const userId = useAppSelector((state) => state.auth.token);
   const allTasks = useAppSelector((state) => 
