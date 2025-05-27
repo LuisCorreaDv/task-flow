@@ -6,6 +6,7 @@ import { useState } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { validateTaskContent } from "@/utils/validations";
 import { useAppSelector } from "@/redux/hooks";
+import { useTaskCache } from "@/hooks/useTaskCache";
 // import { compress, decompress } from "@/utils/compression";
 // import { useEffect } from "react";
 
@@ -48,12 +49,41 @@ function TaskCard({
   //   showTaskData();
   // }, [task]);
 
-
   // Get the user ID from the Redux store and the tasks for that user
-  const userId = useAppSelector((state) => state.auth.token);
-  const allTasks = useAppSelector((state) => 
-    userId ? state.tasks[userId]?.tasks || {} : {}
-  );
+  //Fallback to an empty object if tasks are not available
+  // This is useful for ensuring that the component does not crash if the tasks are not loaded yet
+  const userId = useAppSelector((state) => state.auth.token ?? '');
+  const allTasks = useAppSelector((state) => state.tasks[userId]?.tasks || {});
+
+  // Initialize cache hooks
+  const { getFromCache, setInCache, invalidateCache } = useTaskCache();
+
+  // Try to get task from cache first and update if needed
+  const cachedTask = getFromCache(task.id);
+  if (task.id && !cachedTask && allTasks[task.id]) {
+    setInCache(allTasks[task.id]);
+  }
+
+  // Task handlers with cache management
+  const handleUpdateTask = (id: Id, content: string) => {
+    invalidateCache(id);
+    updateTask(id, content);
+  };
+
+  const handleUpdateStatus = (id: Id, status: TaskStatus) => {
+    invalidateCache(id);
+    updateStatus(id, status);
+  };
+
+  const handleToggleFavorite = (id: Id) => {
+    invalidateCache(id);
+    toggleFavorite(id);
+  };
+
+  const handleDeleteTask = (id: Id) => {
+    invalidateCache(id);
+    deleteTask(id);
+  };
 
   const statusColors: Record<TaskStatus, string> = {
     on_time: "bg-green-100",
@@ -101,11 +131,11 @@ function TaskCard({
       ></div>
     );
   }  const handleContentValidation = (force = false) => {
-    const isValid = validateTaskContent(tempContent);
-
+    const isValid = validateTaskContent(tempContent);    
     // Check for duplicate content
     const isDuplicate = Object.values(allTasks).some(
-      selectedTask => selectedTask.id !== task.id && selectedTask.content.trim().toLowerCase() === tempContent.trim().toLowerCase()
+      // Ensure that the duplicate check ignores the current task being edited
+      (selectedTask: Task) => selectedTask.id !== task.id && selectedTask.content.trim().toLowerCase() === tempContent.trim().toLowerCase()
     );
     
     if (isDuplicate) {
@@ -116,7 +146,7 @@ function TaskCard({
     }
     
     if (isValid) {
-      updateTask(task.id, tempContent.trim());
+      handleUpdateTask(task.id, tempContent.trim());
       setEditMode(false);
     } else if (force) {
       window.alert("Task content must be between 3 and 50 characters long and contain no special characters.");
@@ -171,7 +201,7 @@ function TaskCard({
           onChange={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            updateStatus(task.id, e.target.value as TaskStatus);
+            handleUpdateStatus(task.id, e.target.value as TaskStatus);
             setIsSelectingStatus(false);
           }}
           onMouseDown={(e) => {
@@ -212,7 +242,7 @@ function TaskCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            toggleFavorite(task.id);
+            handleToggleFavorite(task.id);
           }}
           className="absolute bottom-2 left-2 cursor-pointer text-yellow-500 hover:text-yellow-600 transition"
           aria-label="Toggle favorite"
@@ -278,7 +308,7 @@ function TaskCard({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    deleteTask(selectedTaskId);
+                    handleDeleteTask(selectedTaskId);
                     setSelectedTaskId(null);
                   }}
                 >
@@ -301,3 +331,4 @@ function TaskCard({
 }
 
 export default TaskCard;
+
