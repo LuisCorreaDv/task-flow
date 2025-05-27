@@ -6,13 +6,13 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { loginUser } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 function MainForm() {
-
   // Custom hooks to access Redux store and dispatch actions
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { token, loading, error} = useAppSelector((state) => state.auth);
+  const { token, loading, error } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     // Redirect to tasks route if token is present
@@ -28,9 +28,33 @@ function MainForm() {
       initialValues={{ email: "", password: "" }}
       //Schema for form validation
       validationSchema={loginSchema}
-      onSubmit={(values) => {
-        // Dispatch login action with form values
-        dispatch(loginUser(values));
+      onSubmit={async (values, { setSubmitting }) => {
+        toast
+          .promise(
+            dispatch(loginUser(values)).unwrap(),
+            {
+              loading: "Checking credentials...",
+              success: () => {
+                setTimeout(() => router.push("/Verify"), 4000);
+                return "Login successful!";
+              },
+              error: (err) => `${err?.message || `Authentication error: ${error}`}`,
+            },
+            {
+              style: {
+                minWidth: "250px",
+              },
+              success: {
+                duration: 2000,
+                icon: "✅",
+              },
+              error: {
+                duration: 2000,
+                icon: "❌",
+              },
+            }
+          )
+          .finally(() => setSubmitting(false));
       }}
     >
       {({ errors, touched }) => (
@@ -85,13 +109,12 @@ function MainForm() {
               className="text-red-500 text-xs mt-1"
             />
           </div>
-          {error && <div className="text-sm text-red-500">{error}</div>}
           <button
             type="submit"
             className="text-white bg-sky-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             disabled={loading}
           >
-            {loading ? 'Checking credentials...' : 'Login'}
+            Login
           </button>
         </Form>
       )}

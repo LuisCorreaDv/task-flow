@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { clearError, resetVerification, verifyCode, generateVerificationCode } from "@/redux/features/verificationSlice";
 import { useRouter } from "next/navigation";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Toaster } from "react-hot-toast";
 
 function VerifyPage() {
   const dispatch = useAppDispatch();
@@ -24,6 +25,7 @@ function VerifyPage() {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-4 border-2 border-sky-600 rounded-md shadow-lg">
+      <Toaster position="top-left" reverseOrder={false} />
       <h2 className="text-2xl font-bold mb-4 text-center text-sky-800">
         Enter Verification Code
       </h2>

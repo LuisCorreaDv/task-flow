@@ -1,10 +1,12 @@
 import React from "react";
 import LoginForm from "@/components/MainForm";
 import Footer from "@/components/Footer";
+import { Toaster } from "react-hot-toast";
 
 function LogIn() {
   return (
     <>
+      <Toaster position="top-left" reverseOrder={false} />
       {/* Page Header */}
       <header className="mx-auto flex max-w-2xl flex-col items-center gap-6 px-4 py-16">
         <h1 className="text-center text-8xl font-semibold bg-gradient-to-r from-cyan-300 to-sky-800 bg-clip-text text-transparent">
