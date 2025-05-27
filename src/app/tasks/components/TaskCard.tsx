@@ -120,6 +120,7 @@ function TaskCard({
     on_going: "bg-sky-400",
     urgent: "bg-red-400",
     default: "bg-gray-200",
+    completed: "bg-green-800",
   };
 
   const {
@@ -268,6 +269,7 @@ function TaskCard({
           <option value="on_going">On Going</option>
           <option value="delayed">Delayed</option>
           <option value="urgent">Urgent</option>
+          <option value="completed">Completed</option>
         </select>
       </article>
     );

@@ -4,7 +4,8 @@ export type TaskStatus =
   | "delayed"
   | "on_going"
   | "urgent"
-  | "default";
+  | "default"
+  | "completed";
 
 // Types for nodes
 interface BaseNode {

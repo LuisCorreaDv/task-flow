@@ -55,6 +55,7 @@ export default function TaskFilter({
     delayed: "text-yellow-600 font-medium",
     on_going: "text-sky-600 font-medium",
     urgent: "text-red-600 font-medium",
+    completed: "text-green-600 font-medium",
   };
     return (
     <form onSubmit={handleSearchSubmit} className="w-full mx-auto mb-6 flex justify-center items-center">
@@ -156,6 +157,18 @@ export default function TaskFilter({
                   <span className="flex items-center">
                     <span className="w-2 h-2 mr-2 rounded-full bg-red-400"></span>
                     Urgent
+                  </span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => handleSelectStatus("completed")}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-green-700"
+                >
+                  <span className="flex items-center">
+                    <span className="w-2 h-2 mr-2 rounded-full bg-green-700"></span>
+                    Completed
                   </span>
                 </button>
               </li>
