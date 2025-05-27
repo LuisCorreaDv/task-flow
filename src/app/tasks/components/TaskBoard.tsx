@@ -24,7 +24,7 @@ import {
 } from "@/redux/features/taskSlice";
 import PlusIcon from "@/Icons/PlusIcon";
 import { Column, Id, Task, TaskStatus } from "@/types/TaskTypes";
-import { useMemo, useState, useEffect} from "react";
+import { useMemo, useState, useEffect } from "react";
 import React from "react";
 import ColumnContainer from "./ColumnContainer";
 import {
@@ -40,18 +40,20 @@ import {
 import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
+import { Toaster } from "react-hot-toast";
+import { useTaskEvents } from "@/hooks/useTaskEvents";
 
 //Search and Filter Props
 interface TaskBoardProps {
   searchTerm?: string;
-  statusFilter?: TaskStatus | 'all';
+  statusFilter?: TaskStatus | "all";
   favoritesOnly?: boolean;
 }
 
-export default function TaskBoard({ 
-  searchTerm = '', 
-  statusFilter = 'all',
-  favoritesOnly = false 
+export default function TaskBoard({
+  searchTerm = "",
+  statusFilter = "all",
+  favoritesOnly = false,
 }: TaskBoardProps) {
   const dispatch: AppDispatch = useDispatch();
   const columns = useSelector((state: RootState) => state.columns.columns);
@@ -60,6 +62,9 @@ export default function TaskBoard({
   const tasks = useSelector((state: RootState) =>
     selectTasks(state, userId || "")
   );
+
+  // Initialize SSE
+  useTaskEvents(userId ?? "");
 
   useEffect(() => {
     setMounted(true);
@@ -74,14 +79,11 @@ export default function TaskBoard({
         : true;
 
       // Filter by task status
-      const matchesStatus = statusFilter === 'all'
-        ? true
-        : task.status === statusFilter;
-        
+      const matchesStatus =
+        statusFilter === "all" ? true : task.status === statusFilter;
+
       // Filter by favorites
-      const matchesFavorites = favoritesOnly 
-        ? task.isFavorite 
-        : true;
+      const matchesFavorites = favoritesOnly ? task.isFavorite : true;
 
       // The task must match all three filters
       return matchesSearch && matchesStatus && matchesFavorites;
@@ -131,12 +133,12 @@ export default function TaskBoard({
       type: "task",
       parentId: null,
       version: 0,
-      lastModified: 0
+      lastModified: 0,
     };
 
     dispatch(addTaskAction({ userId, task }));
     console.log(task);
-  };
+  }
 
   function deleteTask(id: Id) {
     if (!userId) return;
@@ -206,13 +208,15 @@ export default function TaskBoard({
     //Drop a Task over another task
     if (isOverTask) {
       const overTask = filteredTasks.find((task: Task) => task.id === overId);
-      const activeTask = filteredTasks.find((task: Task) => task.id === activeId);
+      const activeTask = filteredTasks.find(
+        (task: Task) => task.id === activeId
+      );
 
       if (overTask && activeTask) {
-
         const newColumnId = overTask.columnId;
 
-        const taskIdInNewColumn = columns.find(column => column.id === newColumnId)?.taskIds || [];
+        const taskIdInNewColumn =
+          columns.find((column) => column.id === newColumnId)?.taskIds || [];
 
         const newIndex = taskIdInNewColumn.indexOf(overTask.id);
 
@@ -221,7 +225,7 @@ export default function TaskBoard({
             userId,
             taskId: activeId as Id,
             newColumnId: overTask.columnId,
-            newIndex
+            newIndex,
           })
         );
       }
@@ -233,17 +237,18 @@ export default function TaskBoard({
     if (isActiveTask && isOverAColumn) {
       const columnId = overId as Id;
 
-    // Obtain the task IDs in the target column
-    const taskIdsInTargetColumn = columns.find(col => col.id === columnId)?.taskIds || [];
+      // Obtain the task IDs in the target column
+      const taskIdsInTargetColumn =
+        columns.find((col) => col.id === columnId)?.taskIds || [];
 
-    // Insert the task at the end of the column
-    const newIndex = taskIdsInTargetColumn.length;
+      // Insert the task at the end of the column
+      const newIndex = taskIdsInTargetColumn.length;
       dispatch(
         updateTaskColumn({
           userId,
           taskId: activeId as Id,
           newColumnId: overId as Id,
-          newIndex
+          newIndex,
         })
       );
     }
@@ -251,6 +256,7 @@ export default function TaskBoard({
 
   return (
     <div className="h-full flex flex-col py-1 px-6">
+      <Toaster position="top-center" />
       {/* Tasks Section */}
       <DndContext
         sensors={sensors}

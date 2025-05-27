@@ -116,17 +116,20 @@ const taskSlice = createSlice({
         lastModified: Date.now(),
       };
     },
-
     toggleFavorite: (
       state,
-      action: PayloadAction<{ userId: string; taskId: Id }>
+      action: PayloadAction<{
+        userId: string;
+        taskId: Id;
+        isFavorite?: boolean;
+      }>
     ) => {
-      const { userId, taskId } = action.payload;
+      const { userId, taskId, isFavorite } = action.payload;
       if (!state[userId]?.tasks[taskId]) return;
 
       state[userId].tasks[taskId] = {
         ...state[userId].tasks[taskId],
-        isFavorite: !state[userId].tasks[taskId].isFavorite,
+        isFavorite: isFavorite ?? !state[userId].tasks[taskId].isFavorite,
         version: (state[userId].tasks[taskId].version || 0) + 1,
         lastModified: Date.now(),
       };
@@ -134,7 +137,12 @@ const taskSlice = createSlice({
 
     updateTaskColumn: (
       state,
-      action: PayloadAction<{ userId: string; taskId: Id; newColumnId: Id; newIndex: number }>
+      action: PayloadAction<{
+        userId: string;
+        taskId: Id;
+        newColumnId: Id;
+        newIndex: number;
+      }>
     ) => {
       const { userId, taskId, newColumnId, newIndex } = action.payload;
       if (!state[userId]) return;

@@ -102,16 +102,42 @@ function TaskCard({
   const handleUpdateStatus = (id: Id, status: TaskStatus) => {
     invalidateCache(id);
     updateStatus(id, status);
+    // Emit SSE event
+    fetch(`/api/tasks/events?userId=${userId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "statusUpdate", taskId: id, status }),
+    });
   };
 
   const handleToggleFavorite = (id: Id) => {
     invalidateCache(id);
     toggleFavorite(id);
+    // Emit SSE event
+    fetch(`/api/tasks/events?userId=${userId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "favoriteUpdate",
+        taskId: id,
+        isFavorite: !task.isFavorite, // Toggle favorite status
+      }),
+    });
   };
 
   const handleDeleteTask = (id: Id) => {
     invalidateCache(id);
     deleteTask(id);
+
+    // Emit SSE event after local deletion
+    fetch(`/api/tasks/events?userId=${userId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "deleteTask",
+        taskId: id,
+      }),
+    });
   };
 
   const statusColors: Record<TaskStatus, string> = {
