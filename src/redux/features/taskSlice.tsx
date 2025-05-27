@@ -19,14 +19,16 @@ export const selectColumnTasks = createSelector(
   [
     (state: RootState) => state.tasks,
     (_, userId: string) => userId,
-    (_, __, columnId: Id) => columnId
+    (_, __, columnId: Id) => columnId,
   ],
   (tasks, userId, columnId): Task[] => {
     const userTree = tasks[userId];
     if (!userTree) return [];
     const column = userTree.columns[columnId];
     if (!column) return [];
-    return column.taskIds.map(taskId => userTree.tasks[taskId]).filter(Boolean);
+    return column.taskIds
+      .map((taskId) => userTree.tasks[taskId])
+      .filter(Boolean);
   }
 );
 
@@ -36,34 +38,39 @@ const taskSlice = createSlice({
   reducers: {
     addTask: (state, action: PayloadAction<{ userId: string; task: Task }>) => {
       const { userId, task } = action.payload;
-      
+
       if (!state[userId]) {
         state[userId] = { columns: {}, tasks: {} };
       }
 
-      // Add task to user tree
+      // Add task to user tree with version control
       state[userId].tasks[task.id] = {
         ...task,
-        type: 'task',
+        type: "task",
         parentId: task.columnId,
-        status: task.status || 'default',
-        isFavorite: task.isFavorite || false
+        status: task.status || "default",
+        isFavorite: task.isFavorite || false,
+        version: 1,
+        lastModified: Date.now(),
       };
 
       // Update reference in parent column
       if (!state[userId].columns[task.columnId]) {
         state[userId].columns[task.columnId] = {
           id: task.columnId,
-          type: 'column',
-          title: '',
+          type: "column",
+          title: "",
           parentId: null,
-          taskIds: []
+          taskIds: [],
         };
       }
       state[userId].columns[task.columnId].taskIds.push(task.id);
     },
 
-    deleteTask: (state, action: PayloadAction<{ userId: string; taskId: Id }>) => {
+    deleteTask: (
+      state,
+      action: PayloadAction<{ userId: string; taskId: Id }>
+    ) => {
       const { userId, taskId } = action.payload;
       if (!state[userId]) return;
 
@@ -73,35 +80,62 @@ const taskSlice = createSlice({
       // Delete reference from parent column
       const column = state[userId].columns[task.columnId];
       if (column) {
-        column.taskIds = column.taskIds.filter(id => id !== taskId);
+        column.taskIds = column.taskIds.filter((id) => id !== taskId);
       }
 
       // Delete task from user tree
       delete state[userId].tasks[taskId];
     },
 
-    updateTask: (state, action: PayloadAction<{ userId: string; taskId: Id; content: string }>) => {
+    updateTask: (
+      state,
+      action: PayloadAction<{ userId: string; taskId: Id; content: string }>
+    ) => {
       const { userId, taskId, content } = action.payload;
       if (!state[userId]?.tasks[taskId]) return;
-      
-      state[userId].tasks[taskId].content = content;
+
+      state[userId].tasks[taskId] = {
+        ...state[userId].tasks[taskId],
+        content,
+        version: (state[userId].tasks[taskId].version || 0) + 1,
+        lastModified: Date.now(),
+      };
     },
 
-    updateTaskStatus: (state, action: PayloadAction<{ userId: string; taskId: Id; status: string }>) => {
+    updateTaskStatus: (
+      state,
+      action: PayloadAction<{ userId: string; taskId: Id; status: string }>
+    ) => {
       const { userId, taskId, status } = action.payload;
       if (!state[userId]?.tasks[taskId]) return;
 
-      state[userId].tasks[taskId].status = status as Task['status'];
+      state[userId].tasks[taskId] = {
+        ...state[userId].tasks[taskId],
+        status: status as Task["status"],
+        version: (state[userId].tasks[taskId].version || 0) + 1,
+        lastModified: Date.now(),
+      };
     },
 
-    toggleFavorite: (state, action: PayloadAction<{ userId: string; taskId: Id }>) => {
+    toggleFavorite: (
+      state,
+      action: PayloadAction<{ userId: string; taskId: Id }>
+    ) => {
       const { userId, taskId } = action.payload;
       if (!state[userId]?.tasks[taskId]) return;
 
-      state[userId].tasks[taskId].isFavorite = !state[userId].tasks[taskId].isFavorite;
+      state[userId].tasks[taskId] = {
+        ...state[userId].tasks[taskId],
+        isFavorite: !state[userId].tasks[taskId].isFavorite,
+        version: (state[userId].tasks[taskId].version || 0) + 1,
+        lastModified: Date.now(),
+      };
     },
 
-    updateTaskColumn: (state, action: PayloadAction<{ userId: string; taskId: Id; newColumnId: Id }>) => {
+    updateTaskColumn: (
+      state,
+      action: PayloadAction<{ userId: string; taskId: Id; newColumnId: Id }>
+    ) => {
       const { userId, taskId, newColumnId } = action.payload;
       if (!state[userId]) return;
 
@@ -111,7 +145,7 @@ const taskSlice = createSlice({
       // Delete reference from old column
       const oldColumn = state[userId].columns[task.columnId];
       if (oldColumn) {
-        oldColumn.taskIds = oldColumn.taskIds.filter(id => id !== taskId);
+        oldColumn.taskIds = oldColumn.taskIds.filter((id) => id !== taskId);
       }
 
       // Update task's column
@@ -122,16 +156,23 @@ const taskSlice = createSlice({
       if (!state[userId].columns[newColumnId]) {
         state[userId].columns[newColumnId] = {
           id: newColumnId,
-          type: 'column',
-          title: '',
+          type: "column",
+          title: "",
           parentId: null,
-          taskIds: []
+          taskIds: [],
         };
       }
       state[userId].columns[newColumnId].taskIds.push(taskId);
-    }
-  }
+    },
+  },
 });
 
-export const { addTask, deleteTask, updateTask, updateTaskStatus, toggleFavorite, updateTaskColumn } = taskSlice.actions;
+export const {
+  addTask,
+  deleteTask,
+  updateTask,
+  updateTaskStatus,
+  toggleFavorite,
+  updateTaskColumn,
+} = taskSlice.actions;
 export default taskSlice.reducer;

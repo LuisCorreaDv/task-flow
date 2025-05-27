@@ -2,11 +2,12 @@ import DeleteIcon from "@/Icons/DeleteIcon";
 import StarIcon from "@/Icons/StarIcon";
 import { Id, Task, TaskStatus } from "@/types/TaskTypes";
 import { useSortable } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { validateTaskContent } from "@/utils/validations";
 import { useAppSelector } from "@/redux/hooks";
 import { useTaskCache } from "@/hooks/useTaskCache";
+import { useOptimisticLock } from "@/hooks/useLock";
 // import { compress, decompress } from "@/utils/compression";
 // import { useEffect } from "react";
 
@@ -31,12 +32,11 @@ function TaskCard({
   const [selectedTaskId, setSelectedTaskId] = useState<Id | null>(null);
   const [tempContent, setTempContent] = useState(task.content);
 
-  
   // -----   Show compress task data -------
   // const showTaskData = () => {
   //   console.group(`Task Data - ID: ${task.id}`);
   //   console.log('Original task content:', task);
-    
+
   //   const compressedTask = compress(task);
   //   console.log('Compressed task content:', compressedTask);
 
@@ -49,20 +49,45 @@ function TaskCard({
   //   showTaskData();
   // }, [task]);
 
-  // Get the user ID from the Redux store and the tasks for that user
-  //Fallback to an empty object if tasks are not available
-  // This is useful for ensuring that the component does not crash if the tasks are not loaded yet
-  const userId = useAppSelector((state) => state.auth.token ?? '');
-  const allTasks = useAppSelector((state) => state.tasks[userId]?.tasks || {});
-
   // Initialize cache hooks
   const { getFromCache, setInCache, invalidateCache } = useTaskCache();
 
   // Try to get task from cache first and update if needed
   const cachedTask = getFromCache(task.id);
-  if (task.id && !cachedTask && allTasks[task.id]) {
-    setInCache(allTasks[task.id]);
+  if (task.id && !cachedTask) {
+    setInCache(task);
   }
+
+  // Initialize optimistic lock hook
+  const { canUpdate, acquireLock, releaseLock } = useOptimisticLock();
+
+  // Handle edit mode with concurrency control
+  const toggleEditMode = () => {
+    if (!isSelectingStatus) {
+      if (!editMode) {
+        // Try to acquire lock when entering edit mode
+        if (!acquireLock(task.id, task.version)) {
+          window.alert(
+            "This task is currently being edited by another user. Please try again later."
+          );
+          return;
+        }
+      } else {
+        // Release lock when exiting edit mode
+        releaseLock(task.id);
+      }
+
+      setEditMode((prev) => !prev);
+      setMouseIsOver(false);
+      setTempContent(task.content);
+    }
+  };
+
+  // Get the user ID from the Redux store and the tasks for that user
+  //Fallback to an empty object if tasks are not available
+  // This is useful for ensuring that the component does not crash if the tasks are not loaded yet
+  const userId = useAppSelector((state) => state.auth.token ?? "");
+  const allTasks = useAppSelector((state) => state.tasks[userId]?.tasks || {});
 
   // Task handlers with cache management
   const handleUpdateTask = (id: Id, content: string) => {
@@ -114,13 +139,51 @@ function TaskCard({
     transition,
   };
 
-  const toggleEditMode = () => {
-    if (!isSelectingStatus) {
-      setEditMode((prev) => !prev);
-      setMouseIsOver(false);
-      setTempContent(task.content);
+  // Update task with version check
+  const handleContentValidation = (force = false) => {
+    const isValid = validateTaskContent(tempContent);
+
+    // Check for duplicate content
+    const isDuplicate = Object.values(allTasks).some(
+      (selectedTask: Task) =>
+        selectedTask.id !== task.id &&
+        selectedTask.content.trim().toLowerCase() ===
+          tempContent.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      if (force) {
+        window.alert("A task with the same content already exists");
+      }
+      return;
+    }
+
+    if (isValid) {
+      if (!canUpdate(task)) {
+        window.alert(
+          "This task has been modified by another user. Please refresh and try again."
+        );
+        releaseLock(task.id);
+        setEditMode(false);
+        return;
+      }
+
+      handleUpdateTask(task.id, tempContent.trim());
+      setEditMode(false);
+    } else if (force) {
+      window.alert(
+        "Task content must be between 3 and 50 characters long and contain no special characters."
+      );
     }
   };
+  // Cleanup locks on unmount
+  useEffect(() => {
+    return () => {
+      if (editMode) {
+        releaseLock(task.id);
+      }
+    };
+  }, [editMode, task.id, releaseLock]);
 
   if (isDragging) {
     return (
@@ -130,28 +193,7 @@ function TaskCard({
         className="bg-white h-[100px] min-h-[100px] rounded-lg border-2 border-dashed opacity-50"
       ></div>
     );
-  }  const handleContentValidation = (force = false) => {
-    const isValid = validateTaskContent(tempContent);    
-    // Check for duplicate content
-    const isDuplicate = Object.values(allTasks).some(
-      // Ensure that the duplicate check ignores the current task being edited
-      (selectedTask: Task) => selectedTask.id !== task.id && selectedTask.content.trim().toLowerCase() === tempContent.trim().toLowerCase()
-    );
-    
-    if (isDuplicate) {
-      if (force) {
-        window.alert("A task with the same content already exists");
-      }
-      return;
-    }
-    
-    if (isValid) {
-      handleUpdateTask(task.id, tempContent.trim());
-      setEditMode(false);
-    } else if (force) {
-      window.alert("Task content must be between 3 and 50 characters long and contain no special characters.");
-    }
-  };
+  }
 
   if (editMode) {
     return (
@@ -331,4 +373,3 @@ function TaskCard({
 }
 
 export default TaskCard;
-
