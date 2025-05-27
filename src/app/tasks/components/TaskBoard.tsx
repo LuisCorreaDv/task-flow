@@ -137,6 +137,14 @@ export default function TaskBoard({
     };
 
     dispatch(addTaskAction({ userId, task }));
+
+    // Emit SSE event for task creation
+    fetch(`/api/tasks/events?userId=${userId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "taskCreated", task }),
+    });
+
     console.log(task);
   }
 

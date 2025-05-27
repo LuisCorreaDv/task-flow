@@ -20,6 +20,21 @@ export const useTaskEvents = (userId: string) => {
     // Initialize SSE connection
     const eventSource = new EventSource(`/api/tasks/events?userId=${userId}`);
 
+    // Handle task creation
+    eventSource.addEventListener("taskCreated", (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      dispatch(
+        updateTaskStatus({
+          userId,
+          taskId: data.taskId,
+          status: "default", 
+        })
+      );
+      toast.success("New task created successfully!", {
+        icon: "✅",
+      });
+    });
+
     // Handle task updates
     eventSource.addEventListener("statusUpdate", (event: MessageEvent) => {
       const data = JSON.parse(event.data);
@@ -53,6 +68,7 @@ export const useTaskEvents = (userId: string) => {
       );
     });
 
+    // Handle task deletion
     eventSource.addEventListener("deleteTask", (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       dispatch(
