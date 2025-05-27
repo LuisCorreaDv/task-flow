@@ -4,6 +4,7 @@ import {
   updateTaskStatus,
   toggleFavorite,
   deleteTask,
+  addTask
 } from "@/redux/features/taskSlice";
 import toast from "react-hot-toast";
 
@@ -18,16 +19,13 @@ export const useTaskEvents = (userId: string) => {
     if (!userId) return;
 
     // Initialize SSE connection
-    const eventSource = new EventSource(`/api/tasks/events?userId=${userId}`);
-
-    // Handle task creation
+    const eventSource = new EventSource(`/api/tasks/events?userId=${userId}`);    // Handle task creation
     eventSource.addEventListener("taskCreated", (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       dispatch(
-        updateTaskStatus({
+        addTask({
           userId,
-          taskId: data.taskId,
-          status: "default", 
+          task: data.task,
         })
       );
       toast.success("New task created successfully!", {
