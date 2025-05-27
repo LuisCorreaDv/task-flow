@@ -134,9 +134,9 @@ const taskSlice = createSlice({
 
     updateTaskColumn: (
       state,
-      action: PayloadAction<{ userId: string; taskId: Id; newColumnId: Id }>
+      action: PayloadAction<{ userId: string; taskId: Id; newColumnId: Id; newIndex: number }>
     ) => {
-      const { userId, taskId, newColumnId } = action.payload;
+      const { userId, taskId, newColumnId, newIndex } = action.payload;
       if (!state[userId]) return;
 
       const task = state[userId].tasks[taskId];
@@ -162,7 +162,7 @@ const taskSlice = createSlice({
           taskIds: [],
         };
       }
-      state[userId].columns[newColumnId].taskIds.push(taskId);
+      state[userId].columns[newColumnId].taskIds.splice(newIndex, 0, taskId);
     },
   },
 });

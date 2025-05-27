@@ -14,10 +14,9 @@ interface TaskCache {
  */
 export function useTaskCache(timeToLive = 60000) {
   const cacheRef = useRef<TaskCache>({});
-
   // Function to get a task from the cache
   // If the task is not found or has expired, it returns null
-  //useCallback is used to memoize the function so that it does not change on every render
+  // useCallback is used to memoize the function so that it does not change on every render
   const getFromCache = useCallback(
     (taskId: Id): Task | null => {
       const cached = cacheRef.current[taskId];
@@ -30,14 +29,24 @@ export function useTaskCache(timeToLive = 60000) {
         return null;
       }
 
+      // Check if the task has been modified somewhere else
+      if (cached.data.lastModified > cached.timestamp) {
+        delete cacheRef.current[taskId];
+        return null;
+      }
+
       // Return the cached task if it is still valid
       return cached.data;
     },
     [timeToLive]
-  );
-
-    // Function to set a task in the cache
+  );    // Function to set a task in the cache
   const setInCache = useCallback((task: Task) => {
+    // Check if task already exists in cache and compare versions
+    const existing = cacheRef.current[task.id];
+    if (existing && existing.data.version === task.version) {
+      return; // Skip update if version hasn't changed
+    }
+
     // Cache ref is a mutable object, so we can directly modify it
     cacheRef.current[task.id] = {
       data: task,

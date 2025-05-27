@@ -48,15 +48,19 @@ function TaskCard({
   // useEffect(() => {
   //   showTaskData();
   // }, [task]);
-
-  // Initialize cache hooks
+  // Initialize cache hooks for task data persistence
   const { getFromCache, setInCache, invalidateCache } = useTaskCache();
 
-  // Try to get task from cache first and update if needed
-  const cachedTask = getFromCache(task.id);
-  if (task.id && !cachedTask) {
-    setInCache(task);
-  }
+  // Setup cache management
+  useEffect(() => {
+    if (task.id) {
+      const cachedTask = getFromCache(task.id);
+      // Only update cache if task version is newer or not cached
+      if (!cachedTask || cachedTask.version < task.version) {
+        setInCache(task);
+      }
+    }
+  }, [task, getFromCache, setInCache]);
 
   // Initialize optimistic lock hook
   const { canUpdate, acquireLock, releaseLock } = useOptimisticLock();

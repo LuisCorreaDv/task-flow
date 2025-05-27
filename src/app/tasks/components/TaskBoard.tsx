@@ -24,7 +24,7 @@ import {
 } from "@/redux/features/taskSlice";
 import PlusIcon from "@/Icons/PlusIcon";
 import { Column, Id, Task, TaskStatus } from "@/types/TaskTypes";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect} from "react";
 import React from "react";
 import ColumnContainer from "./ColumnContainer";
 import {
@@ -204,14 +204,24 @@ export default function TaskBoard({
     if (!isActiveTask) return;
 
     //Drop a Task over another task
-    if (isActiveTask && isOverTask) {
+    if (isOverTask) {
       const overTask = filteredTasks.find((task: Task) => task.id === overId);
-      if (overTask) {
+      const activeTask = filteredTasks.find((task: Task) => task.id === activeId);
+
+      if (overTask && activeTask) {
+
+        const newColumnId = overTask.columnId;
+
+        const taskIdInNewColumn = columns.find(column => column.id === newColumnId)?.taskIds || [];
+
+        const newIndex = taskIdInNewColumn.indexOf(overTask.id);
+
         dispatch(
           updateTaskColumn({
             userId,
             taskId: activeId as Id,
             newColumnId: overTask.columnId,
+            newIndex
           })
         );
       }
@@ -221,11 +231,19 @@ export default function TaskBoard({
 
     //Drop a task over a column
     if (isActiveTask && isOverAColumn) {
+      const columnId = overId as Id;
+
+    // Obtain the task IDs in the target column
+    const taskIdsInTargetColumn = columns.find(col => col.id === columnId)?.taskIds || [];
+
+    // Insert the task at the end of the column
+    const newIndex = taskIdsInTargetColumn.length;
       dispatch(
         updateTaskColumn({
           userId,
           taskId: activeId as Id,
           newColumnId: overId as Id,
+          newIndex
         })
       );
     }
