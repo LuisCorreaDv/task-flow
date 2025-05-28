@@ -3,15 +3,42 @@ import { logout } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { resetVerification } from "@/redux/features/verificationSlice";
+import toast from "react-hot-toast";
 
 function Header() {
   const dispatch = useDispatch();
   const router = useRouter();
 
   const handleLogout = () => {
-    dispatch(logout());
-    dispatch(resetVerification());
-    router.push("/");
+    toast.promise(
+      // New promise to handle logout
+      new Promise((resolve) => {
+        dispatch(logout());
+        dispatch(resetVerification());
+        setTimeout(resolve, 2000); // Wait for 2 seconds 
+      }),
+      {
+        loading: 'Logging out...',
+        success: () => {
+          setTimeout(() => router.push("/"), 500);
+          return 'See you soon! 👋';
+        },
+        error: 'Error logging out',
+      },
+      {
+        style: {
+          minWidth: '250px',
+        },
+        success: {
+          duration: 500,
+          icon: '✅',
+        },
+        error: {
+          duration: 1000,
+          icon: '❌',
+        },
+      }
+    );
   };
   return (
     <header>
