@@ -105,6 +105,7 @@ export default function TaskFilter({
             <ul className="text-sm text-gray-700 dark:text-gray-200">
               <li>
                 <button
+                  id="status-filter"
                   type="button"
                   onClick={() => handleSelectStatus("all")}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
@@ -179,7 +180,7 @@ export default function TaskFilter({
           <div className="relative w-full">
             <input
               type="search"
-              id="search-dropdown"
+              id="search-tasks"
               className="block p-2.5 w-full z-10 text-sm text-gray-900 bg-white rounded-e-lg border-s-gray-50 border border-gray-300 focus:outline-sky-800 focus:ring-sky-800 focus:border-sky-800 focus:outline-none shadow-md"
               placeholder="Search tasks..."
               value={search}
