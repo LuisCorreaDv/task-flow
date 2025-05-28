@@ -26,6 +26,7 @@ function MainForm() {
     // Formik takes initial values, validation schema, and onSubmit function as props
     <Formik
       initialValues={{ email: "", password: "" }}
+      id="login-form"
       //Schema for form validation
       validationSchema={loginSchema}
       onSubmit={async (values, { setSubmitting }) => {
