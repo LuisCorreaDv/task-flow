@@ -34,7 +34,13 @@ export const loginUser = createAsyncThunk(
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await response.json();
+    const text = await response.text();
+
+    if(!text) {
+      return thunkAPI.rejectWithValue("No response from server");
+    }
+
+    const data = JSON.parse(text);
 
     // Check if the response is ok and contains a token
     // If not, reject the thunk with an error message
