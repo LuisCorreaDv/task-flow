@@ -1,5 +1,6 @@
 # Task Flow - Technical Assessment Project
 ![TF1](https://github.com/user-attachments/assets/04df0cae-3b2d-4d79-bd6a-dc41974bbb9a)
+![TF2](https://github.com/user-attachments/assets/28de3d12-82dd-40a9-8dc9-f781546d0b40)
 
 ## Overview
 Task Flow is a real-time task management application developed as part of a technical assessment. The project demonstrates modern web development practices and implementation of features using some of the latest technologies.
@@ -30,7 +31,7 @@ yarn install
 ```bash
 cp .env.local
 ```
-Edit `.env.local` with the [ReqRes API](https://reqres.in/) configurations.
+Edit `.env.local` with the [ReqRes API](https://reqres.in/) login credentials.
 
 4. Start the development server:
 ```bash
@@ -40,6 +41,27 @@ yarn dev
 ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Authentication Flow
+
+1. **Initial Login**
+   - Use ReqRes API credentials for login:
+     ```
+     Email: eve.holt@reqres.in
+     Password: cityslicka
+     ```
+![TF1](https://github.com/user-attachments/assets/04df0cae-3b2d-4d79-bd6a-dc41974bbb9a)
+
+2. **Two-Factor Authentication**
+   - After successful login, check the developer console
+   - You will see two verification codes displayed as:
+      - ![TF$](https://github.com/user-attachments/assets/401105f2-eefe-4b42-8ece-85ac2e8323bd)
+   - Use the second verification code displayed to complete the 2FA process
+   - Enter the code in the verification page to access the task management system
+
+![TF5](https://github.com/user-attachments/assets/5323b899-9198-47f8-aa75-9beb2c7cdf2c)
+
+**Note**: The two-factor authentication system is part of the technical assessment requirements and simulates a real 2FA implementation. In a production environment, this would be replaced with a proper 2FA service.
 
 ## Project Structure
 
