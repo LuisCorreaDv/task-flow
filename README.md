@@ -1,4 +1,5 @@
 # Task Flow - Technical Assessment Project
+![TF1](https://github.com/user-attachments/assets/04df0cae-3b2d-4d79-bd6a-dc41974bbb9a)
 
 ## Overview
 Task Flow is a real-time task management application developed as part of a technical assessment. The project demonstrates modern web development practices and implementation of features using some of the latest technologies.
